@@ -7,8 +7,8 @@
  */
 
 #include <arpa/inet.h>
-#include <openssl/ssl.h>
 #include <netinet/in.h>
+#include <openssl/ssl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,10 +26,9 @@ static int do_work = 1;
 /*
  * Prepare a SSL context for use by the server
  */
-static SSL_CTX *get_server_context(const char *ca_pem,
-                            const char *cert_pem,
-                            const char *key_pem) {
-    SSL_CTX *ctx;
+static SSL_CTX* get_server_context(const char* ca_pem, const char* cert_pem, const char* key_pem)
+{
+    SSL_CTX* ctx;
 
     /* Get a default context */
     if (!(ctx = SSL_CTX_new(SSLv23_server_method()))) {
@@ -69,8 +68,8 @@ static SSL_CTX *get_server_context(const char *ca_pem,
 
     /* Specify that we need to verify the client as well */
     SSL_CTX_set_verify(ctx,
-                       SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
-                       NULL);
+        SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+        NULL);
 
     /* We accept only certificates signed only by the CA himself */
     SSL_CTX_set_verify_depth(ctx, 1);
@@ -83,7 +82,8 @@ fail:
     return NULL;
 }
 
-static int get_socket(int port_num) {
+static int get_socket(int port_num)
+{
     struct sockaddr_in sin;
     int sock, val;
 
@@ -106,7 +106,7 @@ static int get_socket(int port_num) {
     sin.sin_port = htons(port_num);
 
     /* Bind the socket to the specified port number */
-    if (bind(sock, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
+    if (bind(sock, (struct sockaddr*)&sin, sizeof(sin)) < 0) {
         fprintf(stderr, "Could not bind the socket\n");
         goto fail;
     }
@@ -124,13 +124,13 @@ fail:
     return -1;
 }
 
-int server(const char *port_str, const char *ca_pem,
-           const char *cert_pem, const char *key_pem) {
+int server(const char* port_str, const char* ca_pem, const char* cert_pem, const char* key_pem)
+{
     static char buffer[BUFSIZE];
     struct sockaddr_in sin;
     socklen_t sin_len;
-    SSL_CTX *ctx;
-    SSL *ssl;
+    SSL_CTX* ctx;
+    SSL* ssl;
     int port_num, listen_fd, net_fd, rc, len;
 
     /* Parse the port number, and then validate it's range */
@@ -159,8 +159,9 @@ int server(const char *port_str, const char *ca_pem,
         /* Hold on till we can an incoming connection */
         sin_len = sizeof(sin);
         if ((net_fd = accept(listen_fd,
-                             (struct sockaddr *) &sin,
-                             &sin_len)) < 0) {
+                 (struct sockaddr*)&sin,
+                 &sin_len))
+            < 0) {
             fprintf(stderr, "Failed to accept connection\n");
             continue;
         }
@@ -187,7 +188,7 @@ int server(const char *port_str, const char *ca_pem,
 
         /* Print success connection message on the server */
         printf("SSL handshake successful with %s:%d\n",
-                    inet_ntoa(sin.sin_addr), ntohs(sin.sin_port));
+            inet_ntoa(sin.sin_addr), ntohs(sin.sin_port));
 
         /* Echo server... */
         while ((len = SSL_read(ssl, buffer, BUFSIZE)) != 0) {
