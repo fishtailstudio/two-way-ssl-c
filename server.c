@@ -9,7 +9,6 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <openssl/ssl.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,9 +25,9 @@ static int do_work = 1;
 /*
  * Prepare a SSL context for use by the server
  */
-static SSL_CTX* get_server_context(const char* ca_pem, const char* cert_pem, const char* key_pem)
+static SSL_CTX *get_server_context(const char *ca_pem, const char *cert_pem, const char *key_pem)
 {
-    SSL_CTX* ctx;
+    SSL_CTX *ctx;
 
     /* Get a default context */
     if (!(ctx = SSL_CTX_new(SSLv23_server_method()))) {
@@ -106,7 +105,7 @@ static int get_socket(int port_num)
     sin.sin_port = htons(port_num);
 
     /* Bind the socket to the specified port number */
-    if (bind(sock, (struct sockaddr*)&sin, sizeof(sin)) < 0) {
+    if (bind(sock, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
         fprintf(stderr, "Could not bind the socket\n");
         goto fail;
     }
@@ -124,16 +123,16 @@ fail:
     return -1;
 }
 
-int server(const char* port_str, const char* ca_pem, const char* cert_pem, const char* key_pem)
+int server(const char *port_str, const char *ca_pem, const char *cert_pem, const char *key_pem)
 {
     static char buffer[BUFSIZE];
     struct sockaddr_in sin;
     socklen_t sin_len;
-    SSL_CTX* ctx;
-    SSL* ssl;
+    SSL_CTX *ctx;
+    SSL *ssl;
     int port_num, listen_fd, net_fd, rc, len;
 
-    /* Parse the port number, and then validate it's range */
+    /* Parse the port number, and then validate its range */
     port_num = atoi(port_str);
     if (port_num < 1 || port_num > 65535) {
         fprintf(stderr, "Invalid port number: %s\n", port_str);
@@ -159,8 +158,8 @@ int server(const char* port_str, const char* ca_pem, const char* cert_pem, const
         /* Hold on till we can an incoming connection */
         sin_len = sizeof(sin);
         if ((net_fd = accept(listen_fd,
-                 (struct sockaddr*)&sin,
-                 &sin_len))
+            (struct sockaddr *)&sin,
+            &sin_len))
             < 0) {
             fprintf(stderr, "Failed to accept connection\n");
             continue;

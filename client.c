@@ -16,9 +16,9 @@
 
 #define BUFSIZE 128
 
-static SSL_CTX* get_client_context(const char* ca_pem, const char* cert_pem, const char* key_pem)
+static SSL_CTX *get_client_context(const char *ca_pem, const char *cert_pem, const char *key_pem)
 {
-    SSL_CTX* ctx;
+    SSL_CTX *ctx;
 
     /* Create a generic context */
     if (!(ctx = SSL_CTX_new(SSLv23_client_method()))) {
@@ -67,12 +67,12 @@ fail:
     return NULL;
 }
 
-int client(const char* conn_str, const char* ca_pem, const char* cert_pem, const char* key_pem)
+int client(const char *conn_str, const char *ca_pem, const char *cert_pem, const char *key_pem)
 {
     static char buffer[BUFSIZE];
-    SSL_CTX* ctx;
-    BIO* sbio;
-    SSL* ssl;
+    SSL_CTX *ctx;
+    BIO *sbio;
+    SSL *ssl;
     size_t len;
     /* Failure till we know it's a success */
     int rc = -1;

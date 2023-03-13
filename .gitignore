@@ -1,3 +1,8 @@
 openssl
 core
 keys/
+/cmake-build-debug/
+/build/
+/.vscode/
+/.idea/
+/.cache/
