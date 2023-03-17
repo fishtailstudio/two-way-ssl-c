@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <openssl/ssl.h>
+#include <openssl/err.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -66,9 +67,7 @@ static SSL_CTX *get_server_context(const char *ca_pem, const char *cert_pem, con
     SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
 
     /* Specify that we need to verify the client as well */
-    SSL_CTX_set_verify(ctx,
-        SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
-        NULL);
+    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
 
     /* We accept only certificates signed only by the CA himself */
     SSL_CTX_set_verify_depth(ctx, 1);
@@ -157,10 +156,7 @@ int server(const char *port_str, const char *ca_pem, const char *cert_pem, const
     while (do_work != 0) {
         /* Hold on till we can an incoming connection */
         sin_len = sizeof(sin);
-        if ((net_fd = accept(listen_fd,
-            (struct sockaddr *)&sin,
-            &sin_len))
-            < 0) {
+        if ((net_fd = accept(listen_fd, (struct sockaddr *)&sin, &sin_len)) < 0) {
             fprintf(stderr, "Failed to accept connection\n");
             continue;
         }
@@ -186,8 +182,7 @@ int server(const char *port_str, const char *ca_pem, const char *cert_pem, const
         }
 
         /* Print success connection message on the server */
-        printf("SSL handshake successful with %s:%d\n",
-            inet_ntoa(sin.sin_addr), ntohs(sin.sin_port));
+        printf("SSL handshake successful with %s:%d\n", inet_ntoa(sin.sin_addr), ntohs(sin.sin_port));
 
         /* Echo server... */
         while ((len = SSL_read(ssl, buffer, BUFSIZE)) != 0) {
@@ -195,7 +190,6 @@ int server(const char *port_str, const char *ca_pem, const char *cert_pem, const
                 fprintf(stderr, "SSL read on socket failed\n");
                 break;
             } else if ((rc = SSL_write(ssl, buffer, len)) != len) {
-
                 break;
             }
         }

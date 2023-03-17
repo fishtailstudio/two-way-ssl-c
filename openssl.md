@@ -36,7 +36,7 @@ openssl genrsa -out ca.key 1024
 生成CA机构自己的证书申请文件
 
 ```sh
-openssl req -new -key ca.key -out ca.csr
+openssl req -new -key ca.key -out ca.csr -subj "/C=CN/ST=ZJ/L=HZ/O=HW/OU=DDM/CN=root/emailAddress=root@example.com"
 ```
 
 ## 生成自签名证书
@@ -44,7 +44,7 @@ openssl req -new -key ca.key -out ca.csr
 CA机构用自己的私钥和证书申请文件生成自己签名的证书，俗称自签名证书，这里可以理解为根证书。
 
 ```sh
-openssl x509 -req -in ca.csr -signkey ca.key -out ca.crt -days 365
+openssl x509 -req -in ca.csr -signkey ca.key -days 365 -out ca.crt
 ```
 
 # 生成服务端证书
@@ -60,7 +60,7 @@ openssl genrsa -out server.key 1024
 根据服务器私钥文件生成证书请求文件，这个文件中会包含申请人的一些信息，所以执行下面这行命令过程中需要用户在命令行输入一些用户信息。
 
 ```sh
-openssl req -new -key server.key -out server.csr
+openssl req -new -key server.key -out server.csr -subj "/C=CN/ST=ZJ/L=HZ/O=HW/OU=DDM/CN=root/emailAddress=root@example.com"
 ```
 
 这个命令将会生成一个证书请求，当然，用到了前面生成的密钥 `server.key` 文件。
@@ -71,15 +71,31 @@ openssl req -new -key server.key -out server.csr
 根据CA机构的自签名证书ca.crt或者叫根证书、CA机构的私钥ca.key、服务器的证书申请文件server.csr生成服务端证书
 
 ```sh
-openssl x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial -in server.csr -out server.crt
+openssl x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial -in server.csr -days 365 -out server.crt
 ```
 
 # 生成客户端证书
 
 ```sh
 openssl genrsa -out client.key 1024
-openssl req -new -key client.key -out client.csr -days 365
-openssl x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial -in client.csr -out client.crt
+openssl req -new -key client.key -out client.csr -subj "/C=CN/ST=ZJ/L=HZ/O=HW/OU=DDM/CN=root/emailAddress=root@example.com"
+openssl x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial -in client.csr -days 365 -out client.crt
+```
+
+## 命令汇总
+
+```sh
+openssl genrsa -out ca.key 1024
+openssl req -new -nodes -key ca.key -out ca.pem -subj "/C=CN/ST=ZJ/L=HZ/O=HW/OU=DDM/CN=root/emailAddress=root@example.com"
+openssl x509 -req -in ca.pem -signkey ca.key -days 365 -out ca.pem
+
+openssl genrsa -out server.key 1024
+openssl req -new -nodes -key server.key -out server.pem -subj "/C=CN/ST=ZJ/L=HZ/O=HW/OU=DDM/CN=root/emailAddress=root@example.com"
+openssl x509 -req -CA ca.pem -CAkey ca.key -CAcreateserial -in server.pem -days 365 -out server.pem
+
+openssl genrsa -out client.key 1024
+openssl req -new -nodes -key client.key -out client.pem -subj "/C=CN/ST=ZJ/L=HZ/O=HW/OU=DDM/CN=root/emailAddress=root@example.com"
+openssl x509 -req -CA ca.pem -CAkey ca.key -CAcreateserial -in client.pem -days 365 -out client.pem
 ```
 
 # 证书导出
@@ -88,7 +104,7 @@ openssl x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial -in client.csr -out c
 有时需要用到pem格式的证书，可以用以下方式合并证书文件（crt）和私钥文件（key）来生成
 
 ```sh
-cat client.crt client.key> client.pem 
+cat client.crt client.key > client.pem 
 cat server.crt server.key > server.pem
 ```
 
