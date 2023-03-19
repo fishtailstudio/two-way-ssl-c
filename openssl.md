@@ -28,7 +28,7 @@ x509证书一般会用到三类文件，key，csr，crt。
 ## 生成CA私钥
 
 ```sh
-openssl genrsa -out ca.key 1024
+openssl genrsa -out ca.key 2048
 ```
 
 ## 生成证书请求
@@ -52,7 +52,7 @@ openssl x509 -req -in ca.csr -signkey ca.key -days 365 -out ca.crt
 ## 生成RSA密钥
 
 ```sh
-openssl genrsa -out server.key 1024
+openssl genrsa -out server.key 2048
 ```
 
 ## 生成证书请求
@@ -60,7 +60,7 @@ openssl genrsa -out server.key 1024
 根据服务器私钥文件生成证书请求文件，这个文件中会包含申请人的一些信息，所以执行下面这行命令过程中需要用户在命令行输入一些用户信息。
 
 ```sh
-openssl req -new -key server.key -out server.csr -subj "/C=CN/ST=ZJ/L=HZ/O=HW/OU=DDM/CN=root/emailAddress=root@example.com"
+openssl req -new -key server.key -out server.csr -subj "/C=CN/ST=ZJ/L=HZ/O=HW/OU=DDM/CN=server/emailAddress=root@example.com"
 ```
 
 这个命令将会生成一个证书请求，当然，用到了前面生成的密钥 `server.key` 文件。
@@ -77,25 +77,25 @@ openssl x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial -in server.csr -days 
 # 生成客户端证书
 
 ```sh
-openssl genrsa -out client.key 1024
-openssl req -new -key client.key -out client.csr -subj "/C=CN/ST=ZJ/L=HZ/O=HW/OU=DDM/CN=root/emailAddress=root@example.com"
+openssl genrsa -out client.key 2048
+openssl req -new -key client.key -out client.csr -subj "/C=CN/ST=ZJ/L=HZ/O=HW/OU=DDM/CN=client/emailAddress=root@example.com"
 openssl x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial -in client.csr -days 365 -out client.crt
 ```
 
 ## 命令汇总
 
 ```sh
-openssl genrsa -out ca.key 1024
-openssl req -new -nodes -key ca.key -out ca.pem -subj "/C=CN/ST=ZJ/L=HZ/O=HW/OU=DDM/CN=root/emailAddress=root@example.com"
-openssl x509 -req -in ca.pem -signkey ca.key -days 365 -out ca.pem
+openssl genrsa -out ca.key 2048
+openssl req -new -nodes -key ca.key -out ca.csr -subj "/C=CN/ST=ZJ/L=HZ/O=HW/OU=DDM/CN=root/emailAddress=root@example.com"
+openssl x509 -req -in ca.crt -signkey ca.key -days 365 -out ca.crt
 
-openssl genrsa -out server.key 1024
-openssl req -new -nodes -key server.key -out server.pem -subj "/C=CN/ST=ZJ/L=HZ/O=HW/OU=DDM/CN=root/emailAddress=root@example.com"
-openssl x509 -req -CA ca.pem -CAkey ca.key -CAcreateserial -in server.pem -days 365 -out server.pem
+openssl genrsa -out server.key 2048
+openssl req -new -nodes -key server.key -out server.csr -subj "/C=CN/ST=ZJ/L=HZ/O=HW/OU=DDM/CN=server/emailAddress=root@example.com"
+openssl x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial -in server.csr -days 365 -out server.crt
 
-openssl genrsa -out client.key 1024
-openssl req -new -nodes -key client.key -out client.pem -subj "/C=CN/ST=ZJ/L=HZ/O=HW/OU=DDM/CN=root/emailAddress=root@example.com"
-openssl x509 -req -CA ca.pem -CAkey ca.key -CAcreateserial -in client.pem -days 365 -out client.pem
+openssl genrsa -out client.key 2048
+openssl req -new -nodes -key client.key -out client.csr -subj "/C=CN/ST=ZJ/L=HZ/O=HW/OU=DDM/CN=client/emailAddress=root@example.com"
+openssl x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial -in client.csr -days 365 -out client.crt
 ```
 
 # 证书导出
@@ -113,21 +113,21 @@ cat server.crt server.key > server.pem
 在一个终端执行
 
 ```sh
-openssl s_server -CAfile keys/ca.crt -cert keys/server.crt -key keys/server.key -Verify 1
+openssl s_server -CAfile certs/ca.crt -cert certs/server.crt -key certs/server.key -Verify 1
 ```
 
 在另一个终端执行
 
 ```sh
-openssl s_client -CAfile keys/ca.crt -cert keys/client.crt -key keys/client.key
+openssl s_client -CAfile certs/ca.crt -cert certs/client.crt -key certs/client.key
 ```
 
 # 加密通信
 
 ```sh
-./openssl server 50000 keys/ca.crt keys/server.crt keys/server.key
+./openssl server 50000 certs/ca.crt certs/server.crt certs/server.key
 ```
 
 ```sh
-./openssl client 127.0.0.1:50000 keys/ca.crt keys/client.crt keys/client.key
+./openssl client 127.0.0.1:50000 certs/ca.crt certs/client.crt certs/client.key
 ```

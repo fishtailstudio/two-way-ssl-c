@@ -1,8 +1,9 @@
 openssl
 core
-keys/
+certs/
 /cmake-build-debug/
 /build/
 /.vscode/
 /.idea/
 /.cache/
+*.dSYM
